@@ -4,7 +4,6 @@ import { ConfigProvider, Layout, Menu, theme } from 'antd'
 import Logo from './components/logo/Logo'
 import '../global.less'
 import { useState, useEffect } from 'react'
-import Profile from './components/profile'
 import zhCN from 'antd/lib/locale/zh_CN'
 import enUS from 'antd/lib/locale/en_US'
 import { getBrowserLang } from '@/utils/utils'
@@ -18,10 +17,6 @@ const { Header, Content, Footer } = Layout
 let routeKeys = {}
 
 export default function LayoutIndex() {
-  // const params = useParams()
-  // const chain = params.chain
-  // console.log('chain 是什么啊啊啊啊啊', chain)
-  // const [selectChainItem, setSelectChainItem] = useState<ChainItemProps>()
   const currentChainItem = getChainItemByPath(history.location.pathname)
   console.log('当前的 chain 是什么是什么是什么呀', currentChainItem)
   // 国际化相关
@@ -69,9 +64,7 @@ export default function LayoutIndex() {
               disabledOverflow
               className={styles.menu}
               onClick={handleChangeMenu}
-              // defaultValue={chain}
               defaultSelectedKeys={[currentChainItem?.key]}
-              // selectedKeys={[selectChainItem?.key]}
             />
             <Language language={language} setLanguage={setLanguage} />
           </Header>
