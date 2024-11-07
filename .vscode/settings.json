@@ -1,0 +1,39 @@
+{
+  "editor.codeActionsOnSave": {
+    // "source.fixAll": "explicit",
+    "source.organizeImports": "never"
+  },
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[shellscript]": {
+    "editor.defaultFormatter": "foxundermoon.shell-format"
+  },
+  "[ignore]": {
+    "editor.defaultFormatter": "foxundermoon.shell-format"
+  },
+  "[typescriptreact][javascript][typescript][json][jsonc][html][css][markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  // if not config separately, it will not work in some cases
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "cSpell.words": [
+    "antd",
+    "Blockhash",
+    "Cnft",
+    "comission",
+    "eddsa",
+    "favicons",
+    "Keypair",
+    "LAMPORTS",
+    "Metaplex",
+    "Objs",
+    "Sepolia",
+    "solana",
+    "solscan",
+    "Sunpump",
+    "tronweb",
+    "txid"
+  ]
+}
