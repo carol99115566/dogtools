@@ -3,14 +3,15 @@ import {
   clusterApiUrl,
   PublicKey,
   Keypair,
+  Signer,
   LAMPORTS_PER_SOL,
   TransactionError,
   Transaction,
   SystemProgram,
   sendAndConfirmTransaction,
 } from '@solana/web3.js'
-import { IWalletMeta } from '@/type/wallet'
-const { createMint } = require('@solana/spl-token')
+import { IWalletMeta, IWalletInfo } from '@/type/wallet'
+const { createMint, transfer, getOrCreateAssociatedTokenAccount, getAccount } = require('@solana/spl-token')
 // const { Metaplex, bundlrStorage, keypairIdentity } = require('@metaplex-foundation/js')
 import { Result, SOLTokenInfo } from '@/type/token'
 import bs58 from 'bs58'
@@ -199,6 +200,42 @@ export async function getBalanceByPrivateKey(privateKey: string): Promise<number
   return undefined
 }
 
+// 通过私钥获取钱包余额
+export async function getTokenBalanceFromPrivateKey(privateKey: string, tokenAddress: string): Promise<string> {
+  const keypair = getKeypairFromStr(privateKey)
+  if (keypair) {
+    const address = new PublicKey(tokenAddress)
+    try {
+      // 获取 token account 的余额
+      const tokenAccountInfo = await getAccount(defaultConnection, tokenAddress)
+      console.log('Token Balance:', tokenAccountInfo.amount.toString())
+      return tokenAccountInfo.amount.toString()
+    } catch (error) {
+      console.error('Error fetching token balance:', error)
+      return '0'
+    }
+  }
+  return '0'
+}
+
+/**
+ * 通过私钥获取钱包信息
+ * @param {string} privateKey - 钱包私钥
+ * @returns {IWalletInfo | undefined} - 返回需要的钱包信息
+ */
+export async function getWalletInfoFromPrivateKey(privateKey: string): Promise<IWalletInfo | undefined> {
+  const keypair = getKeypairFromStr(privateKey)
+  if (keypair) {
+    const balance = await defaultConnection.getBalance(keypair.publicKey)
+    return {
+      privateKey: privateKey,
+      address: keypair.publicKey.toString(),
+      balance: balance / 1000000000,
+    }
+  }
+  return undefined
+}
+
 // 钱包管理获取有余额的大数组
 export async function getBuyerBalanceWallets(wallets: IBuyerWalletsManage[]): Promise<IBuyerWalletsWithBalance[]> {
   const resultWallets: IBuyerWalletsWithBalance[] = []
@@ -230,5 +267,111 @@ export function getKeypairFromStr(str: string): web3.Keypair {
     return Keypair.fromSecretKey(buyerPrivateKey)
   } catch (error) {
     throw 'Keypair Not Found'
+  }
+}
+
+export const transferAllTokens = async (
+  connection,
+  senderWallet: Signer,
+  mintPubkey: PublicKey,
+  receiverAddress: string,
+  // customLog,
+) => {
+  // 发送交易并确认
+  try {
+    // 接收者的钱包地址
+    const recipientPublicKey = new PublicKey(receiverAddress)
+    // 获取或创建发送者的 Associated Token Account (ATA)
+    const senderTokenAccount = await getOrCreateAssociatedTokenAccount(
+      connection,
+      senderWallet, // 发送者的钱包
+      mintPubkey, // 代币的 mint 地址
+      senderWallet.publicKey, // 发送者的钱包地址
+    )
+    console.log('senderTokenAccount', senderTokenAccount)
+
+    // 获取发送者账户的 SPL 代币余额
+    const senderTokenAccountInfo = await getAccount(connection, senderTokenAccount.address)
+    const senderBalance = senderTokenAccountInfo.amount // 代币余额 (单位为最小单位，如 10^6)
+    if (senderBalance === 0n) {
+      console.log('The sender has no tokens to transfer.')
+      return
+    }
+    console.log('senderBalance', senderBalance)
+
+    // 获取或创建接收者的 Associated Token Account (ATA)
+    const recipientTokenAccount = await getOrCreateAssociatedTokenAccount(
+      connection,
+      senderWallet, // 发送者的钱包 (支付手续费)
+      mintPubkey, // 代币的 mint 地址
+      recipientPublicKey, // 接收者的钱包地址
+      undefined,
+      'confirmed',
+      {
+        commitment: 'confirmed',
+      },
+    )
+    console.log('recipientTokenAccount', recipientTokenAccount)
+
+    const signature = await transfer(
+      connection,
+      senderWallet,
+      senderTokenAccount.address, // 发送者的代币账户地址
+      recipientTokenAccount.address, // 接收者的代币账户地址
+      senderWallet.publicKey, // 发送者的公共地址（签名者）
+      senderBalance, // 转账金额 (单位为代币的最小单位，通常是小数点后的精度)
+      [],
+      {
+        skipPreflight: true,
+        maxRetries: 2,
+        commitment: 'confirmed',
+      },
+    )
+    // customLog(
+    //   `✅ Transfer transaction confirmed! View on <a target='_blank' href='https://solscan.io/tx/${signature}'>Solscan</a>`,
+    // )
+  } catch (error: any) {
+    console.log('transferAllTokens error', error)
+    // customLog('❌ Transfer transaction failed: ', error?.message, JSON.stringify(error))
+  }
+}
+
+/**
+ * 验证私钥是否合法
+ * @param {string} privateKey - 私钥
+ * @returns {boolean} - 返回私钥是否合法
+ */
+export const isValidPrivateKey = (privateKey: string) => {
+  try {
+    // Decode the Base58 private key
+    const privateKeyUint8Array = bs58.decode(privateKey)
+    // Check if the length is valid (64 bytes for Solana private keys)
+    if (privateKeyUint8Array.length !== 64) {
+      return false
+    }
+    // Try to create a Keypair with the decoded key
+    Keypair.fromSecretKey(privateKeyUint8Array)
+    return true
+  } catch (error) {
+    // If any error occurs, the private key is invalid
+    return false
+  }
+}
+
+/**
+ * 校验钱包地址是否合法
+ * @param {string} address - 要校验的钱包地址
+ * @returns {boolean} - 如果地址合法则返回true，否则返回false
+ */
+export const isValidAddress = (address: string) => {
+  try {
+    // 尝试创建PublicKey对象
+    const publicKey = new PublicKey(address)
+    // 校验该地址是否在曲线上
+    return PublicKey.isOnCurve(publicKey)
+  } catch (error) {
+    // console.log('isValidAddress error', error)
+    // 捕获任何错误，意味着地址不合法
+    return false
   }
 }

@@ -1,5 +1,5 @@
 // import { WalletMeta } from '@/pages/bundle/type'
-import CreateWalletModal, { ICreateWalletForm } from '@/pages/walletManage/wallet/createWallet'
+import CreateWalletModal, { ICreateWalletForm } from '@/pages/walletManage/address/createWallet'
 import { queryUserWallets } from '@/services/api'
 import { CHAIN_ITEMS, maskPrivateKey } from '@/utils/chain'
 import { PlusOutlined } from '@ant-design/icons'

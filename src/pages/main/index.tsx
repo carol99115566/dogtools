@@ -1,35 +1,19 @@
 import { Steps, Flex, Alert, Tabs, Menu, Space } from 'antd'
 import React, { useEffect, useState } from 'react'
-import { getContentItems } from './items'
-import { useChainContext } from '@/layouts/chainContext'
 import { history, Outlet, useParams } from 'umi'
 import './index.less'
+import { allMainMenuItems, getMainMenuItemByPath } from '@/layouts/type'
 
 const MainContent: React.FC = () => {
-  const chainItem = useChainContext()
-  if (!chainItem) return
+  const items = getMainMenuItemByPath(history.location.pathname)?.items
 
-  const items = getContentItems(chainItem.value)
-
-  const getDefaultKey = () => {
-    let selectKey = history.location.pathname
-    items.forEach((element) => {
-      element.children.forEach((childElement) => {
-        if (childElement.key) {
-          if (history.location.pathname.includes(childElement.key)) {
-            selectKey = childElement.key
-          }
-        }
-      })
-    })
-    return selectKey
-  }
-
-  // const allkeys = getDefaultKey()
-
-  if (history.location.pathname === '/sol') {
-    history.push('/sol/pump')
-  }
+  useEffect(() => {
+    let key = history.location.pathname
+    const allkeys = items.map((item) => item.key)
+    if (!allkeys.includes(key)) {
+      history.push(allkeys[0])
+    }
+  }, [items])
 
   const handleMenuClick = (e) => {
     history.push(e.key)
@@ -45,9 +29,9 @@ const MainContent: React.FC = () => {
           style={{ flex: 1, minWidth: 0 }}
           disabledOverflow
           onClick={handleMenuClick}
-          defaultSelectedKeys={[getDefaultKey()]}
+          defaultSelectedKeys={[history.location.pathname]}
         />
-        <div style={{ width: '80%' }}>
+        <div style={{ width: '80%', minHeight: '600px' }}>
           <Outlet />
         </div>
       </Flex>

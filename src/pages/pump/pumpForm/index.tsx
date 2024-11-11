@@ -1,6 +1,6 @@
 import { Button, Input, Form, Modal, Result, Tooltip, Popover } from 'antd'
 import React, { useEffect } from 'react'
-import { getSwapBuyers } from '@/utils/utils'
+import { getCurrentTime, getSwapBuyers } from '@/utils/utils'
 import './index.less'
 import { LoadingOutlined } from '@ant-design/icons'
 import { ResultStatusType } from 'antd/es/result'
@@ -10,6 +10,9 @@ import { useTokenBundle } from './useBundle'
 import BuyerWalletsSelect from '@/component/buyerWalletsSelect'
 import WalletsSelect from '@/component/walletsSelect'
 import { useTranslation } from 'react-i18next'
+import { createAndBuy } from '../utils'
+import CodeEditor from '@/component/walletInputModal'
+import BulkPrivatekeySelect from '@/component/bulkPrivatekeySelect'
 
 const BundleStatus = {
   NONE: 'none',
@@ -57,6 +60,19 @@ const PumpBundleForm: React.FC = () => {
   const [bundleStatus, setBundleStatus] = React.useState<BundleStatusValue>(BundleStatus.NONE)
   const bundle = useTokenBundle('pump')
 
+  const customLog = (...args: any) => {
+    const time = getCurrentTime()
+    console.log(time, ...args)
+    const newLog = args.join(' ') + '<br />'
+    const newTotalLog = `${totalLogRef.current}<div>${timeHtml(time)} ${newLog}</div>`
+    setTotalLog(newTotalLog)
+    totalLogRef.current = newTotalLog
+  }
+
+  const timeHtml = (time: string) => {
+    return `<span style='opacity: 0.6; width: 200px'>${time}</span>`
+  }
+
   const onBundleFinished = (res, task: TaskMeta) => {
     const status = res.success ? BundleStatus.SUCCESS : BundleStatus.FAIL
     setBundleStatus(status)
@@ -66,21 +82,21 @@ const PumpBundleForm: React.FC = () => {
     setShowMore(!showMore)
   }
 
-  const addNewToken = (tokenInfo: any) => {
-    addToken({
-      platform: 'pump.fun',
-      token_info: JSON.stringify(tokenInfo),
-      trading_open: true,
-      address: tokenInfo.contractAddress,
-      listname: `${tokenInfo.name}(${tokenInfo.symbol})`,
-    })
-  }
+  // const addNewToken = (tokenInfo: any) => {
+  //   addToken({
+  //     platform: 'pump.fun',
+  //     token_info: JSON.stringify(tokenInfo),
+  //     trading_open: true,
+  //     address: tokenInfo.contractAddress,
+  //     listname: `${tokenInfo.name}(${tokenInfo.symbol})`,
+  //   })
+  // }
 
-  const getContractAddress = (log: string) => {
-    const splitFirst = log.split('https://pump.fun/')[1]
-    const address = splitFirst.split("'>")[0]
-    return address
-  }
+  // const getContractAddress = (log: string) => {
+  //   const splitFirst = log.split('https://pump.fun/')[1]
+  //   const address = splitFirst.split("'>")[0]
+  //   return address
+  // }
 
   const onSubmit = async () => {
     setTotalLog('')
@@ -89,74 +105,67 @@ const PumpBundleForm: React.FC = () => {
     form
       .validateFields()
       .then(async (formValues) => {
-        let { data } = await createCoin(formValues)
         const buyerObjs = getSwapBuyers(formValues.buyers)
-        const { data: task } = await addTask({
-          type: 'bundle',
-          platform: 'pump',
-          form_values: JSON.stringify({
-            ...formValues,
-            buyers: buyerObjs,
-            tokenMetadata: data.metadata,
-            metadataUri: data.metadataUri,
-          }),
-        })
-        setOpen(true)
-        let contractAddress
-        sse = new EventSource(`${BUNDLE_BASE_URL}/${task.id}/start`)
+        // 在 pumpfun 创建代币数据
+        let { data } = await createCoin(formValues)
+        const result = await createAndBuy(formValues.privateKey, buyerObjs, data.metadata, data.metadataUri, customLog)
+
+        // setOpen(true)
+        // let contractAddress
+        // sse = new EventSource(`${BUNDLE_BASE_URL}/${task.id}/start`)
         // 当接收到消息时执行此回调
-        sse.addEventListener('log', (e) => {
-          let newlog = e.data
-          if (newlog.includes('[start]')) {
-            newlog = newlog.replace('[start]', t('bundle.pumpFunForm.loading.begin'))
-          }
-          if (newlog.includes('[existError]')) {
-            newlog = newlog.replace('[existError]', t('bundle.pumpFunForm.loading.error'))
-          }
-          if (newlog.includes('[confirmed]')) {
-            newlog = newlog.replace('[confirmed]', t('bundle.pumpFunForm.loading.confirmed'))
-          }
-          if (newlog.includes('[url]')) {
-            newlog = newlog.replace('[url]', t('bundle.pumpFunForm.loading.urlDes'))
-            contractAddress = getContractAddress(newlog)
-          }
-          if (newlog.includes('[transactionSent]')) {
-            newlog = newlog.replace('[transactionSent]', t('bundle.pumpFunForm.loading.transactionSent'))
-          }
-          if (newlog.includes('[transactionFailed]')) {
-            newlog = newlog.replace('[transactionFailed]', t('bundle.pumpFunForm.loading.transactionFailed'))
-          }
-          setOpen(true)
-          const newTotalLog = `${totalLogRef.current}${newlog}`
-          setTotalLog(newTotalLog)
-          totalLogRef.current = newTotalLog
-        })
-        sse.addEventListener('status', (e) => {
-          setOpen(true)
-          const status = e.data as TASK_STATUS
-          if (status === 'success') {
-            onBundleFinished({ success: true }, task)
-            // 增加一个代币记录
-            addNewToken({
-              ...data.metadata,
-              metadataUri: data.metadataUri,
-              contractAddress: contractAddress,
-            })
-          } else if (status === 'fail') {
-            onBundleFinished({ success: false }, task)
-          }
-        })
-        sse.addEventListener('ping', (e) => {
-          setOpen(true)
-        })
+        // sse.addEventListener('log', (e) => {
+        //   let newlog = e.data
+        //   if (newlog.includes('[start]')) {
+        //     newlog = newlog.replace('[start]', t('bundle.pumpFunForm.loading.begin'))
+        //   }
+        //   if (newlog.includes('[existError]')) {
+        //     newlog = newlog.replace('[existError]', t('bundle.pumpFunForm.loading.error'))
+        //   }
+        //   if (newlog.includes('[confirmed]')) {
+        //     newlog = newlog.replace('[confirmed]', t('bundle.pumpFunForm.loading.confirmed'))
+        //   }
+        //   if (newlog.includes('[url]')) {
+        //     newlog = newlog.replace('[url]', t('bundle.pumpFunForm.loading.urlDes'))
+        //     contractAddress = getContractAddress(newlog)
+        //   }
+        //   if (newlog.includes('[transactionSent]')) {
+        //     newlog = newlog.replace('[transactionSent]', t('bundle.pumpFunForm.loading.transactionSent'))
+        //   }
+        //   if (newlog.includes('[transactionFailed]')) {
+        //     newlog = newlog.replace('[transactionFailed]', t('bundle.pumpFunForm.loading.transactionFailed'))
+        //   }
+        //   setOpen(true)
+        //   const newTotalLog = `${totalLogRef.current}${newlog}`
+        //   setTotalLog(newTotalLog)
+        //   totalLogRef.current = newTotalLog
+        // })
+        // sse.addEventListener('status', (e) => {
+        //   setOpen(true)
+        //   const status = e.data as TASK_STATUS
+        //   if (status === 'success') {
+        //     onBundleFinished({ success: true }, task)
+        //     // 增加一个代币记录
+        //     addNewToken({
+        //       ...data.metadata,
+        //       metadataUri: data.metadataUri,
+        //       contractAddress: contractAddress,
+        //     })
+        //   } else if (status === 'fail') {
+        //     onBundleFinished({ success: false }, task)
+        //   }
+        // })
+        // sse.addEventListener('ping', (e) => {
+        //   setOpen(true)
+        // })
         // 错误处理
-        sse.onerror = (error) => {
-          setOpen(true)
-          // 上面的status event会先触发的，这里再调，会把状态覆盖为fail
-          // onBundleFinished({ success: false }, task)
-          sse.close()
-          console.error('EventSource failed:', error)
-        }
+        // sse.onerror = (error) => {
+        //   setOpen(true)
+        //   // 上面的status event会先触发的，这里再调，会把状态覆盖为fail
+        //   // onBundleFinished({ success: false }, task)
+        //   sse.close()
+        //   console.error('EventSource failed:', error)
+        // }
       })
       .catch((err) => {
         console.log('表单出错出错出错了', err)
@@ -229,7 +238,8 @@ const PumpBundleForm: React.FC = () => {
           validateTrigger="onSubmit"
           name={'buyers'}
         >
-          <BuyerWalletsSelect chain="SOL" />
+          <BulkPrivatekeySelect type="buy" onChange={() => {}} />
+          {/* <BuyerWalletsSelect chain="SOL" /> */}
         </Form.Item>
         <Form.Item wrapperCol={{ offset: 3 }}>
           <Button

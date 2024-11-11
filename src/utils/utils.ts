@@ -1,4 +1,6 @@
-import { IBuyerObj } from '@/pages/snipe/type'
+// import { IBuyerObj } from '@/pages/snipe/type'
+import CryptoJS from 'crypto-js'
+import { IBuyerObj } from '@/pages/pump/type'
 
 export const getSwapBuyers = (receiverText: string): IBuyerObj[] => {
   const receivers = receiverText.trim().split('\n')
@@ -60,4 +62,41 @@ export const getBrowserLang = () => {
     defaultBrowserLang = 'en'
   }
   return defaultBrowserLang
+}
+
+export function getCurrentTime() {
+  const now = new Date()
+
+  // 获取小时、分钟、秒、毫秒
+  const hours = String(now.getHours()).padStart(2, '0')
+  const minutes = String(now.getMinutes()).padStart(2, '0')
+  const seconds = String(now.getSeconds()).padStart(2, '0')
+  const milliseconds = String(now.getMilliseconds()).padStart(3, '0')
+
+  // 返回格式化的时间
+  return `${hours}:${minutes}:${seconds} ${milliseconds}`
+}
+
+export function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+// 加密函数
+export function encryptStringAES(plainText: string, secretKey: string): string {
+  try {
+    const encrypted = CryptoJS.AES.encrypt(plainText, secretKey).toString()
+    return encrypted
+  } catch (error) {
+    throw error
+  }
+}
+
+// 解密函数
+export function decryptStringAES(encryptedText: string, secretKey: string): string {
+  try {
+    const decrypted = CryptoJS.AES.decrypt(encryptedText, secretKey).toString(CryptoJS.enc.Utf8)
+    return decrypted
+  } catch (error) {
+    throw error
+  }
 }

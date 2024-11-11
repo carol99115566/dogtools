@@ -21,15 +21,21 @@ export default defineConfig({
     {
       path: '/',
       routes: [
-        { path: '/', redirect: '/sol' },
+        { path: '/', redirect: '/sol/pump/create' },
         {
-          path: '/sol',
-          redirect: '/sol/pump-create',
+          path: 'sol/pump',
+          component: 'main',
           routes: [
-            { path: '/sol/pump-create', component: '@/pages/pump/pumpForm' },
-            // { path: '/sol/my-tokens', component: '@/pages/tokenManage' },
-            // { path: '/sol/create-wallets', component: '@/pages/walletManage/createWallets' },
-            // { path: '/sol/wallets-manage', component: '@/pages/walletManage' },
+            { path: '/sol/pump/create', component: '@/pages/pump/pumpForm' },
+            { path: '/sol/pump/selling', component: '@/pages/pump/bulkSelling' },
+          ],
+        },
+        {
+          path: '/sol/wallet-manage',
+          component: 'main',
+          routes: [
+            { path: '/sol/wallet-manage/address', component: '@/pages/walletManage/address' },
+            { path: '/sol/wallet-manage/privatekey', component: '@/pages/walletManage/privateKey' },
           ],
         },
       ],

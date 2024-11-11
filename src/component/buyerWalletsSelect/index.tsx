@@ -1,11 +1,11 @@
 // import { BuyerWalletsMeta } from '@/pages/bundle/type'
-import CreateBuyerWalletsModal from '@/pages/walletManage/buyerWallets/createBuyerWallets'
+import CreateBuyerWalletsModal from '@/pages/walletManage/privateKey/createBuyerWallets'
 import { queryUserBuyerWallets } from '@/services/api'
 import { CHAIN_ITEMS } from '@/utils/chain'
 import { PlusOutlined } from '@ant-design/icons'
 import { Button, Divider, Flex, Input, message, Select, Space, Spin } from 'antd'
 import { useEffect, useState } from 'react'
-import { ICreateBuyerWalletsForm } from '@/pages/walletManage/buyerWallets/createBuyerWallets'
+import { ICreateBuyerWalletsForm } from '@/pages/walletManage/privateKey/createBuyerWallets'
 import { useTranslation } from 'react-i18next'
 import { BuyerWalletsMeta } from '@/pages/pump/type'
 

@@ -10,21 +10,29 @@ import { getBrowserLang } from '@/utils/utils'
 import Language from './components/Language/Language'
 import i18n from '@/language'
 import { ChainItemContext } from './chainContext'
-import { ChainItemProps, allChainItems, getChainItemByPath } from './type'
+import { ChainItemProps, allMainMenuItems, getMainMenuItemByPath } from './type'
 import type { MenuProps } from 'antd'
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
+import { ConnectWallet } from './components/ConnectWallet'
+import { useWallet } from '@solana/wallet-adapter-react'
+import ClientWalletProvider from './ClientWalletProvider'
+import { PasswordProvider } from './passwordContext'
+
+import 'tailwindcss/tailwind.css'
+// import "../styles/globals.css";
+// import "../styles/App.css";
 
 const { Header, Content, Footer } = Layout
 let routeKeys = {}
 
 export default function LayoutIndex() {
-  const currentChainItem = getChainItemByPath(history.location.pathname)
-  console.log('当前的 chain 是什么是什么是什么呀', currentChainItem)
+  const currentChainItem = getMainMenuItemByPath(history.location.pathname)
   // 国际化相关
   const [i18nLocale, setI18nLocale] = useState(zhCN)
   const [language, setLanguage] = useState(localStorage.getItem('language'))
 
   const handleChangeMenu: MenuProps['onClick'] = (e) => {
-    history.push(`/${e.key.toLowerCase()}`)
+    history.push(`${e.key}`)
   }
 
   // 设置 antd 语言国际化
@@ -43,6 +51,15 @@ export default function LayoutIndex() {
     setAntdLanguage()
   }, [language])
 
+  const [walletToParsePublicKey, setWalletToParsePublicKey] = useState<string>('')
+  const { publicKey } = useWallet()
+
+  const onUseWalletClick = () => {
+    if (publicKey) {
+      setWalletToParsePublicKey(publicKey?.toBase58())
+    }
+  }
+
   return (
     <ConfigProvider
       locale={i18nLocale}
@@ -52,26 +69,34 @@ export default function LayoutIndex() {
         },
       }}
     >
-      <ChainItemContext.Provider value={{ chainItem: currentChainItem }}>
-        <Layout className={styles.layoutWrapper}>
-          <Header className={styles.header} style={{ paddingLeft: 80 }}>
-            <Logo />
-            <Menu
-              theme="light"
-              mode="horizontal"
-              items={allChainItems}
-              style={{ flex: 1, minWidth: 0 }}
-              disabledOverflow
-              className={styles.menu}
-              onClick={handleChangeMenu}
-              defaultSelectedKeys={[currentChainItem?.key]}
-            />
-            <Language language={language} setLanguage={setLanguage} />
-          </Header>
-          <Outlet />
-          <Footer style={{ textAlign: 'center' }}>DevTools ©{new Date().getFullYear()}</Footer>
-        </Layout>
-      </ChainItemContext.Provider>
+      <PasswordProvider>
+        <ClientWalletProvider autoConnect={true}>
+          <ChainItemContext.Provider value={{ chainItem: currentChainItem }}>
+            <Layout className={styles.layoutWrapper}>
+              <Header className={styles.header} style={{ paddingLeft: 80 }}>
+                <Logo />
+                <Menu
+                  theme="light"
+                  mode="horizontal"
+                  items={allMainMenuItems}
+                  style={{ flex: 1, minWidth: 0 }}
+                  disabledOverflow
+                  className={styles.menu}
+                  onClick={handleChangeMenu}
+                  defaultSelectedKeys={[currentChainItem?.key]}
+                />
+                <div className="flex-none">
+                  <WalletMultiButton className="btn btn-ghost" />
+                  <ConnectWallet onUseWalletClick={onUseWalletClick} />
+                </div>
+                <Language language={language} setLanguage={setLanguage} />
+              </Header>
+              <Outlet />
+              <Footer style={{ textAlign: 'center' }}>DevTools ©{new Date().getFullYear()}</Footer>
+            </Layout>
+          </ChainItemContext.Provider>
+        </ClientWalletProvider>
+      </PasswordProvider>
     </ConfigProvider>
   )
 }

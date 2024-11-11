@@ -6,6 +6,7 @@ export const AUTH_TOKEN_KEY = 'authToken'
 export const DEFAULT_SLIPPAGE = 50
 
 export const PUMP_CREATE_URL = 'https://pump.fun/create'
+export const HELIUS_RPC_URL = 'https://mainnet.helius-rpc.com/?api-key=442f35bf-48ea-42c6-a0ec-d0e6248499c1'
 
 export const sniperItems: SnipeItemProps[] = [
   //   {
@@ -42,6 +43,4 @@ export const SOL_RPC_ENDPOINT_MAIN =
 export const SOL_RPC_ENDPOINT_DEV =
   'https://white-proportionate-putty.solana-devnet.quiknode.pro/11132715a936f8adb03c940c627d6c0b9369d9e6/'
 
-export const SECRET_KEY = 'devtools_manage_2024'
-export const BUYER_WALLET_MANAGE = '_walletmanager_buyer_'
-export const WALLET_MANAGE = '_walletmanager_dev'
+export const PRIVATE_KEY_WALLET_MANAGE = '_private_key_wallet_manager_'
