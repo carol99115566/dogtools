@@ -7,6 +7,7 @@ import { truncateText } from '@/utils/utils'
 import { LoadingOutlined, SyncOutlined, DeleteOutlined } from '@ant-design/icons'
 import type { TableProps } from 'antd'
 import AmountInputModal from '../amountInputModal'
+import WalletSelectModal from '../walletSelectModal'
 
 interface IBulkPrivatekeySelect {
   privateKey: string
@@ -23,6 +24,7 @@ const BulkPrivatekeySelect: React.FC<{
 }> = ({ onChange, type, tokenAddress }) => {
   const { t } = useTranslation()
   const [isManualInputOpen, setIsManualInputOpen] = useState(false)
+  const [isPrivateSelectOpen, setIsPrivateSelectOpen] = useState(false)
   const [isAmountInputOpen, setIsAmountInputOpen] = useState(false)
   const [wallets, setWallets] = useState<IBulkPrivatekeySelect[]>()
   const [loading, setLoading] = useState(false)
@@ -228,7 +230,9 @@ const BulkPrivatekeySelect: React.FC<{
     setIsManualInputOpen(true)
   }
 
-  const handleAddFromPrivateManage = () => {}
+  const handleAddFromPrivateManage = () => {
+    setIsPrivateSelectOpen(true)
+  }
 
   const headerRender = () => {
     return (
@@ -241,7 +245,11 @@ const BulkPrivatekeySelect: React.FC<{
 
   const footerRender = () => {
     if (wallets?.length) {
-      return <>{`共选择 ${wallets?.length} 个钱包，总买入金额`}</>
+      return (
+        <span className="table-tip">
+          共 <strong>{wallets?.length}</strong> 个钱包
+        </span>
+      )
     } else {
       return null
     }
@@ -271,6 +279,16 @@ const BulkPrivatekeySelect: React.FC<{
           setIsManualInputOpen(false)
         }}
       ></WalletInputModal>
+      <WalletSelectModal
+        open={isPrivateSelectOpen}
+        onCancel={() => {
+          setIsPrivateSelectOpen(false)
+        }}
+        onOK={(privatekeys) => {
+          calculateBigWallet(privatekeys)
+          setIsPrivateSelectOpen(false)
+        }}
+      />
       <AmountInputModal
         onOK={handleInputAllAmount}
         open={isAmountInputOpen}

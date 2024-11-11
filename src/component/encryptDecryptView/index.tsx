@@ -3,7 +3,7 @@ import styles from './index.less'
 import { Button, Flex, Input, Space, message } from 'antd'
 import { usePassword } from '@/layouts/passwordContext'
 import { PRIVATE_KEY_WALLET_MANAGE } from '@/utils/constant'
-import { getBulkWallets } from '@/pages/walletManage/utils'
+import { getBulkWalletsMeta } from '@/pages/walletManage/utils'
 
 const EncryptDecryptView: React.FC = () => {
   const { password, setPassword } = usePassword()
@@ -17,7 +17,7 @@ const EncryptDecryptView: React.FC = () => {
     }
     // 校验是否能解锁成功
     if (storePrivateKeys) {
-      const wallets = getBulkWallets(value)
+      const wallets = getBulkWalletsMeta(value)
       if (!wallets) {
         message.error('password error')
         return

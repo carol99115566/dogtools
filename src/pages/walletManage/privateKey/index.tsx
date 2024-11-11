@@ -6,7 +6,7 @@ import { useChainContext } from '@/layouts/chainContext'
 import { IBulkWalletMeta, IBulkWallet, IWalletInfo } from '@/type/wallet'
 import WalletInputModal, { IInputWalletData } from '@/component/walletInputModal'
 import IntroductView from '@/component/introductView'
-import { addBulkWallet, deleteBulkWallet, getBulkWallets, updateBulkWallet } from '../utils'
+import { addBulkWallet, deleteBulkWallet, getBulkWalletsInfo, updateBulkWallet } from '../utils'
 import { usePassword } from '@/layouts/passwordContext'
 import { getWalletInfoFromPrivateKey } from '@/utils/SOL_Util'
 import type { TableColumnsType } from 'antd'
@@ -162,37 +162,11 @@ const BuyerWalletsTable: React.FC = () => {
     refreshDataSource()
   }, [password])
 
-  const refreshDataSource = () => {
+  const refreshDataSource = async () => {
     if (password) {
-      const wallets = getBulkWallets(password)
-      if (wallets) {
-        configBulkWallets(wallets)
-      }
-    }
-  }
-
-  const configBulkWallets = async (bulkMetaWallets: IBulkWalletMeta[]) => {
-    setLoading(true)
-    try {
-      const currentBulkWallets: IBulkWallet[] = []
-      for (let index = 0; index < bulkMetaWallets.length; index++) {
-        const element = bulkMetaWallets[index]
-        const privateKeys = element.privateKeys.split('\n')
-        const wallets: IWalletInfo[] = []
-        for (let privateKey of privateKeys) {
-          const wallet = await getWalletInfoFromPrivateKey(privateKey)
-          if (wallet) wallets.push(wallet)
-        }
-        currentBulkWallets.push({
-          key: `${index}`,
-          name: element.name,
-          wallets: wallets,
-        })
-      }
-      setBulkWallets(currentBulkWallets)
-    } catch (err: any) {
-    } finally {
-      setLoading(false)
+      setLoading(true)
+      const wallets = await getBulkWalletsInfo(password)
+      setBulkWallets(wallets)
     }
   }
 
