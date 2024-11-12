@@ -44,3 +44,5 @@ export const SOL_RPC_ENDPOINT_DEV =
   'https://white-proportionate-putty.solana-devnet.quiknode.pro/11132715a936f8adb03c940c627d6c0b9369d9e6/'
 
 export const PRIVATE_KEY_WALLET_MANAGE = '_private_key_wallet_manager_'
+
+export const SHYFT_API_KEY = 'zTzdsl45DqK847Nr'

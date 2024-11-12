@@ -1,3 +1,4 @@
+import { SHYFT_API_KEY } from '@/utils/constant'
 import { get, post } from './instance'
 
 // 发送 GET 请求
@@ -26,6 +27,16 @@ export const getCoinData = (tokenAddress: string) => {
 export const getLatestCoins = () => {
   const url = `https://frontend-api.pump.fun/coins?offset=0&limit=10&sort=created_timestamp&order=DESC&includeNsfw=false`
   return get(`/api/proxy/get?url=${encodeURIComponent(url)}`)
+}
+
+export const getAllTokens = (walletAddress: string) => {
+  const url = `https://api.shyft.to/sol/v1/wallet/all_tokens?network=mainnet-beta&wallet=${walletAddress}`
+  return fetch(url, {
+    method: 'GET',
+    headers: {
+      'x-api-key': SHYFT_API_KEY,
+    },
+  }).then((response) => response.json())
 }
 
 export const createCoin = (create) => {

@@ -36,8 +36,28 @@ export const allMainMenuItems = [
     key: '/sol/wallet-manage',
     label: 'Wallet Manage',
     items: [
-      { key: '/sol/wallet-manage/address', label: '地址管理' },
-      { key: '/sol/wallet-manage/privatekey', label: '私钥管理' },
+      {
+        key: 'myWallet',
+        label: '我的钱包',
+        type: 'group',
+        children: [
+          { key: '/sol/wallet-manage/privatekey', label: '私钥管理' },
+          { key: '/sol/wallet-manage/address', label: '地址管理' },
+        ],
+      },
+      {
+        key: 'walletAction',
+        label: '钱包操作',
+        type: 'group',
+        children: [
+          { key: '/sol/wallet-manage/create-wallets', label: '批量生成钱包' },
+          { key: '/sol/wallet-manage/multi-sender', label: '批量转账' },
+          { key: '/sol/wallet-manage/batch-collection', label: '批量归集' },
+          { key: '/sol/wallet-manage/multi-to-multi', label: '多对多转账' },
+          { key: '/sol/wallet-manage/recocery-rent', label: '租金回收' },
+          { key: '/sol/wallet-manage/batch-reclaim-rent', label: '批量租金回收' },
+        ],
+      },
     ],
   },
 ]

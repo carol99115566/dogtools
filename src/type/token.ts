@@ -1,3 +1,16 @@
+export interface ITokenMeta {
+  address: string
+  associated_account: string
+  balance: number
+  info: {
+    decimals: number
+    image: string
+    metadata_uri: string
+    name: string
+    symbol: string
+  }
+}
+
 export interface TokenMeta {
   id: number
   user_id: string

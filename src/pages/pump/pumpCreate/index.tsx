@@ -1,4 +1,4 @@
-import { Button, Input, Form, Modal, Result, Tooltip, Popover } from 'antd'
+import { Button, Input, Form, Modal, Result, Tooltip, Popover, Row, Col, Flex } from 'antd'
 import React, { useEffect } from 'react'
 import { getCurrentTime, getSwapBuyers } from '@/utils/utils'
 import './index.less'
@@ -7,12 +7,13 @@ import { ResultStatusType } from 'antd/es/result'
 import { addTask, addToken, createCoin } from '@/services/api'
 import { TASK_STATUS, TaskMeta } from '@/type/task'
 import { useTokenBundle } from './useBundle'
-import BuyerWalletsSelect from '@/component/buyerWalletsSelect'
-import WalletsSelect from '@/component/walletsSelect'
 import { useTranslation } from 'react-i18next'
 import { createAndBuy } from '../utils'
-import CodeEditor from '@/component/walletInputModal'
 import BulkPrivatekeySelect from '@/component/bulkPrivatekeySelect'
+import IntroductView from '@/component/introductView'
+import SelectLogo from '@/component/selectLogo'
+import TitleSwitch from '@/component/titleSwitch'
+import ChoiceInputView from '@/component/ChoiceInputView'
 
 const BundleStatus = {
   NONE: 'none',
@@ -55,6 +56,8 @@ const PumpBundleForm: React.FC = () => {
   const [form] = Form.useForm()
   const [open, setOpen] = React.useState(false)
   const [showMore, setShowMore] = React.useState(false)
+  const [showSocialLink, setShowSocialLink] = React.useState(false)
+  const [showAdvancedOptions, setShowAdvancedOptions] = React.useState(false)
   const totalLogRef = React.useRef('')
   const [totalLog, setTotalLog] = React.useState('')
   const [bundleStatus, setBundleStatus] = React.useState<BundleStatusValue>(BundleStatus.NONE)
@@ -194,53 +197,76 @@ const PumpBundleForm: React.FC = () => {
 
   return (
     <>
-      <Form className="pump-bundle-form" form={form} labelCol={{ span: 3 }}>
-        <Form.Item label={t('bundle.pumpFunForm.name')} name="name" rules={[{ required: true }]}>
-          <Input />
-        </Form.Item>
-        <Form.Item label={t('bundle.pumpFunForm.ticker')} name="symbol" rules={[{ required: true }]}>
-          <Input />
-        </Form.Item>
+      <IntroductView
+        title="Pump 开盘并买入"
+        subTitle="在 Pump.fun 开盘时，其他地址同时进行代币买入操作，有效简化交易流程并加速市场参与，快人一步，抢得先机，从而更早获得潜在的收益。"
+      />
+      <Form className="pump-bundle-form" form={form} layout="vertical">
+        <Row gutter={36}>
+          <Col span={12}>
+            <Form.Item label={t('bundle.pumpFunForm.name')} name="name" rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
+            <Form.Item label={t('bundle.pumpFunForm.ticker')} name="symbol" rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              label={t('bundle.pumpFunForm.image')}
+              name="file"
+              valuePropName="fileList"
+              getValueFromEvent={normFile}
+              rules={[{ required: true }]}
+            >
+              <SelectLogo />
+              {/* <input required type="file" name="image" accept="image/*" /> */}
+            </Form.Item>
+          </Col>
+        </Row>
+
         <Form.Item label={t('bundle.pumpFunForm.description')} name="description">
           <Input.TextArea rows={3} />
         </Form.Item>
-        <Form.Item
-          label={t('bundle.pumpFunForm.image')}
-          name="file"
-          valuePropName="fileList"
-          getValueFromEvent={normFile}
-          rules={[{ required: true }]}
-        >
-          <input required type="file" name="image" accept="image/*" />
-        </Form.Item>
-        {renderShowMore()}
-        {showMore && (
-          <>
-            <Form.Item label={t('bundle.pumpFunForm.twitterLink')} name="twitter">
-              <Input />
-            </Form.Item>
-            <Form.Item label={t('bundle.pumpFunForm.telegramLink')} name="telegram">
-              <Input />
-            </Form.Item>
-            <Form.Item label={t('bundle.pumpFunForm.website')} name="website">
-              <Input />
-            </Form.Item>
-          </>
+        <TitleSwitch
+          title="添加社交链接"
+          onChange={(value) => {
+            setShowSocialLink(value)
+          }}
+        />
+        {showSocialLink && (
+          <Row gutter={36}>
+            <Col span={12}>
+              <Form.Item label={t('bundle.pumpFunForm.twitterLink')} name="twitter">
+                <Input />
+              </Form.Item>
+              <Form.Item label={t('bundle.pumpFunForm.website')} name="website">
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label={t('bundle.pumpFunForm.telegramLink')} name="telegram">
+                <Input />
+              </Form.Item>
+            </Col>
+          </Row>
         )}
-
-        <Form.Item rules={[{ required: true }]} label="dev wallet" name="privateKey">
-          <WalletsSelect chain="SOL" />
-        </Form.Item>
-        <Form.Item
-          rules={bundle.getBuyersRules(form)}
-          label={t('common.buyerWallets')}
-          validateFirst
-          validateTrigger="onSubmit"
-          name={'buyers'}
-        >
+        <div>
+          <span className="title-group">其他钱包买入参数设置</span>
           <BulkPrivatekeySelect type="buy" onChange={() => {}} />
-          {/* <BuyerWalletsSelect chain="SOL" /> */}
-        </Form.Item>
+        </div>
+
+        <TitleSwitch
+          title="高级选项"
+          onChange={(value) => {
+            setShowAdvancedOptions(value)
+          }}
+        />
+        {showAdvancedOptions && (
+          <Flex>
+            <ChoiceInputView type="jito" onChange={() => {}} />
+          </Flex>
+        )}
         <Form.Item wrapperCol={{ offset: 3 }}>
           <Button
             type="primary"

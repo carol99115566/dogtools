@@ -1,6 +1,11 @@
-import CodeEditor from '@/component/walletInputModal'
-import { FC, useState } from 'react'
+import TokenSelect from '@/component/tokenSelect'
 
-export const BulkSelling: FC = () => {
-  return <></>
+const BulkSelling: React.FC = () => {
+  return (
+    <>
+      <TokenSelect />
+    </>
+  )
 }
+
+export default BulkSelling

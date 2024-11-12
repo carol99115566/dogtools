@@ -26,7 +26,7 @@ export default defineConfig({
           path: 'sol/pump',
           component: 'main',
           routes: [
-            { path: '/sol/pump/create', component: '@/pages/pump/pumpForm' },
+            { path: '/sol/pump/create', component: '@/pages/pump/pumpCreate' },
             { path: '/sol/pump/selling', component: '@/pages/pump/bulkSelling' },
           ],
         },
@@ -36,6 +36,12 @@ export default defineConfig({
           routes: [
             { path: '/sol/wallet-manage/address', component: '@/pages/walletManage/address' },
             { path: '/sol/wallet-manage/privatekey', component: '@/pages/walletManage/privateKey' },
+            { path: '/sol/wallet-manage/create-wallets', component: '@/pages/walletManage/privateKey' },
+            { path: '/sol/wallet-manage/multi-sender', component: '@/pages/walletManage/privateKey' },
+            { path: '/sol/wallet-manage/batch-collection', component: '@/pages/walletManage/privateKey' },
+            { path: '/sol/wallet-manage/multi-to-multi', component: '@/pages/walletManage/privateKey' },
+            { path: '/sol/wallet-manage/recocery-rent', component: '@/pages/walletManage/privateKey' },
+            { path: '/sol/wallet-manage/batch-reclaim-rent', component: '@/pages/walletManage/privateKey' },
           ],
         },
       ],

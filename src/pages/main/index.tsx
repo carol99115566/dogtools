@@ -31,7 +31,7 @@ const MainContent: React.FC = () => {
           onClick={handleMenuClick}
           defaultSelectedKeys={[history.location.pathname]}
         />
-        <div style={{ width: '80%', minHeight: '600px' }}>
+        <div style={{ width: '80%', minHeight: '600px', paddingLeft: '45px', paddingRight: '45px' }}>
           <Outlet />
         </div>
       </Flex>

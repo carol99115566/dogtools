@@ -1,5 +1,5 @@
 import styles from './index.less'
-import { Flex } from 'antd'
+import { Divider, Flex, Space } from 'antd'
 import React from 'react'
 
 const IntroductView: React.FC<{
@@ -8,15 +8,16 @@ const IntroductView: React.FC<{
   image?: string
 }> = ({ title, subTitle, image }) => {
   return (
-    <div className={styles.titleView}>
-      <img className={styles.img} src={image} />
-      <Flex vertical={true} gap={10}>
-        <Flex gap={10} vertical={false} align="center">
+    <Flex vertical={true}>
+      <Space>
+        {image && <img className={styles.img} src={image} />}
+        <Flex vertical={true} gap={10}>
           <span className={styles.title}>{title}</span>
+          <div className={styles.description}>{subTitle}</div>
         </Flex>
-        <div className={styles.description}>{subTitle}</div>
-      </Flex>
-    </div>
+      </Space>
+      <Divider />
+    </Flex>
   )
 }
 
