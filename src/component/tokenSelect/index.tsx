@@ -7,7 +7,9 @@ import { ITokenMeta } from '@/type/token'
 import { isValidAddress } from '@/utils/SOL_Util'
 const { Option } = Select
 
-const TokenSelect: React.FC = () => {
+const TokenSelect: React.FC<{
+  canOther?: boolean // select 的 value 是否可以是除 options 以外的地址
+}> = ({ canOther = true }) => {
   const [selectedToken, setSelectedToken] = useState<string | null>(null)
   const [searchText, setSearchText] = useState<string | null>(null)
   const [tokenList, setTokenList] = useState<ITokenMeta[] | null>(null)
@@ -21,7 +23,7 @@ const TokenSelect: React.FC = () => {
 
   const handleBlur = () => {
     console.log('handleBlur', selectedToken, searchText)
-    if (!selectedToken && searchText) {
+    if (!selectedToken && searchText && canOther) {
       if (isValidAddress(searchText)) {
         setSelectedToken(searchText)
       }

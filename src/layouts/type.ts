@@ -1,4 +1,7 @@
 import i18n from '@/language'
+import type { MenuProps } from 'antd'
+
+type MenuItem = Required<MenuProps>['items'][number]
 
 export interface ChainItemProps {
   key: string
@@ -11,19 +14,13 @@ export interface ChainItemProps {
   items: any[]
 }
 
-// export const allChainItems: ChainItemProps[] = [
-//   {
-//     key: '/sol',
-//     label: 'SOL',
-//     logo: 'https://file.dexx.ai/static/img/chain/sol.png',
-//     viewOnName: 'solscan.io',
-//     hashEndPoint: 'https://solscan.io/tx',
-//     tokenEndPoint: 'https://solscan.io/tx/token',
-//     items:
-//   },
-// ]
+export interface MainMenuProps {
+  key: string
+  label: string
+  items: MenuItem[]
+}
 
-export const allMainMenuItems = [
+export const allMainMenuItems: MainMenuProps[] = [
   {
     key: '/sol/pump',
     label: 'Pump',
@@ -37,7 +34,7 @@ export const allMainMenuItems = [
     label: 'Wallet Manage',
     items: [
       {
-        key: 'myWallet',
+        key: '/sol/my-wallet',
         label: '我的钱包',
         type: 'group',
         children: [
@@ -69,6 +66,22 @@ export const getMainMenuItemByPath = (path: string) => {
   return currentItem || allMainMenuItems[0]
 }
 
+export const getMainItemAllKeys = (path: string): string[] => {
+  const mainItem = getMainMenuItemByPath(path)
+  return collectKeys(mainItem.items)
+}
+
+function collectKeys(items: MenuItem[]) {
+  let keys = []
+
+  items.forEach((item) => {
+    keys.push(item.key)
+    if (item.children && item.children.length > 0) {
+      keys = keys.concat(collectKeys(item.children)) // 递归收集子级 keys
+    }
+  })
+  return keys
+}
 // export const getChildMenuItemByPath = (path: string) => {
 //   const currentItem = allChainItems.find((element) => {
 //     return path.includes(element.key)

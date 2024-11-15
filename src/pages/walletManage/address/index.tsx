@@ -5,6 +5,7 @@ import { deleteWallet, queryUserWallets } from '@/services/api'
 import './index.less'
 import { useTranslation } from 'react-i18next'
 import WalletInputModal from '@/component/walletInputModal'
+import IntroductView from '@/component/introductView'
 
 const WalletTable: React.FC = () => {
   const { t } = useTranslation()
@@ -84,6 +85,7 @@ const WalletTable: React.FC = () => {
 
   return (
     <>
+      <IntroductView title="地址管理" subTitle="本功能将您的钱包地址保存在本地，方便你的批量操作" />
       <Button
         onClick={handleAdd}
         type="primary"
@@ -107,13 +109,6 @@ const WalletTable: React.FC = () => {
           }
         }
       ></Table>
-      {/* <CreateWalletModal
-        key={modalKey}
-        initialFormValues={initialFormValues}
-        isModalOpen={isModalOpen}
-        handleCancel={handleCancel}
-        handleSuccess={handleSuccess}
-      /> */}
       <WalletInputModal
         key={modalKey}
         type="address"

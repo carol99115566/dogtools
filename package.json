@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.4.0",
+    "@ant-design/pro-components": "^2.8.1",
     "@coral-xyz/anchor": "^0.30.1",
     "@coral-xyz/borsh": "^0.30.1",
     "@metaplex-foundation/mpl-bubblegum": "^4.2.1",
@@ -24,7 +25,6 @@
     "@solana/wallet-adapter-react-ui": "^0.9.35",
     "@solana/wallet-adapter-wallets": "^0.19.32",
     "@solana/web3.js": "^1.95.3",
-    "@tailwindcss/typography": "^0.4.1",
     "@web3-react/coinbase-wallet": "^8.2.3",
     "@web3-react/core": "^8.2.3",
     "@web3-react/eip1193": "^8.2.3",
@@ -45,7 +45,6 @@
     "bs58": "^6.0.0",
     "codemirror": "5",
     "crypto-js": "^4.2.0",
-    "daisyui": "^1.16.2",
     "ethers": "^6.7.1",
     "html-to-text": "^9.0.5",
     "i18next": "^23.14.0",

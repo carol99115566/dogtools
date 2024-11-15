@@ -2,16 +2,21 @@ import { Steps, Flex, Alert, Tabs, Menu, Space } from 'antd'
 import React, { useEffect, useState } from 'react'
 import { history, Outlet, useParams } from 'umi'
 import './index.less'
-import { allMainMenuItems, getMainMenuItemByPath } from '@/layouts/type'
+import { allMainMenuItems, getMainItemAllKeys, getMainMenuItemByPath } from '@/layouts/type'
 
 const MainContent: React.FC = () => {
   const items = getMainMenuItemByPath(history.location.pathname)?.items
 
   useEffect(() => {
     let key = history.location.pathname
-    const allkeys = items.map((item) => item.key)
+    const item = items[0]
+    const allkeys = getMainItemAllKeys(key)
     if (!allkeys.includes(key)) {
-      history.push(allkeys[0])
+      if (item?.type === 'group' && item.children?.length) {
+        history.push(item.children[0].key)
+      } else {
+        history.push(allkeys[0])
+      }
     }
   }, [items])
 

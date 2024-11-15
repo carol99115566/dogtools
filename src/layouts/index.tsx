@@ -18,7 +18,7 @@ import { useWallet } from '@solana/wallet-adapter-react'
 import ClientWalletProvider from './ClientWalletProvider'
 import { PasswordProvider } from './passwordContext'
 
-import 'tailwindcss/tailwind.css'
+// import 'tailwindcss/tailwind.css'
 // import "../styles/globals.css";
 // import "../styles/App.css";
 
@@ -85,11 +85,12 @@ export default function LayoutIndex() {
                   onClick={handleChangeMenu}
                   defaultSelectedKeys={[currentChainItem?.key]}
                 />
-                <div className="flex-none">
-                  <WalletMultiButton className="btn btn-ghost" />
+                <WalletMultiButton style={{ backgroundColor: 'black', height: '40px' }} />
+
+                {/* <div className="flex-none">
                   <ConnectWallet onUseWalletClick={onUseWalletClick} />
-                </div>
-                <Language language={language} setLanguage={setLanguage} />
+                </div> */}
+                {/* <Language language={language} setLanguage={setLanguage} /> */}
               </Header>
               <Outlet />
               <Footer style={{ textAlign: 'center' }}>DevTools ©{new Date().getFullYear()}</Footer>

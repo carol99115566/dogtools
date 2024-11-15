@@ -18,7 +18,7 @@ const messageInfo = {
     label: '私钥列表，每一行输入一个私钥',
     example: `example:\n66q5NPxMopuG2sb3JdNh1h3fePZnLJ7YdAq1XXKyJBUBNZ5hiSQF8mtydro2pVRBiQF1hfHvvud9aYM3jw5qsyd6\n3Z7Wg9cd3HZxZqusffHMqJHtsuyCCXyp19b9p15GzTTNpXnmmBhwJqxusneem9svV1k9v6bL65Y1352YPktQPG6y`,
   },
-  buy: {
+  receivers: {
     label: '收款地址列表',
     example: `example:（每一行应包括地址和数量，地址和数量之间用英文逗号隔开）\n66q5NPxMopuG2sb3JdNh1h3fePZnLJ7YdAq1XXKyJBUBNZ5hiSQF8mtydro2pVRBiQF1hfHvvud9aYM3jw5qsyd6,0.001\n3Z7Wg9cd3HZxZqusffHMqJHtsuyCCXyp19b9p15GzTTNpXnmmBhwJqxusneem9svV1k9v6bL65Y1352YPktQPG6y,0.001`,
   },
@@ -27,43 +27,25 @@ const messageInfo = {
 export interface IInputWalletData {
   name?: string
   value: string
+  onChange: (value: string) => void
 }
 
 function WalletInputModal({
-  open,
   walletData,
   type,
-  hasName = false,
-  onOK,
-  onCancel,
-  title = '导入钱包',
+  onChange,
 }: {
   walletData?: IInputWalletData
-  open: boolean
-  type: 'address' | 'privateKey' | 'buy'
-  hasName?: boolean
-  onOK: (data: IInputWalletData, isAdd: boolean) => void
-  onCancel: () => void
-  title?: string
+  type: 'address' | 'privateKey' | 'receivers'
 }) {
   const { token } = useToken()
   const { t } = useTranslation()
   const [codeValue, setCodeValue] = useState(walletData?.value || '')
   const [errorLines, setErrorLines] = useState<number[]>()
-  const [name, setName] = useState<string>(walletData?.name || '')
   const editorRef = useRef(null) // Ref to store CodeMirror instance
   const showInfo = messageInfo[type]
 
-  const handleOK = () => {
-    onOK(
-      {
-        name: name,
-        value: codeValue,
-      },
-      walletData ? false : true,
-    )
-  }
-
+  // 检测地址、私钥、买入的格式是否合法
   const checkValue = (value: string) => {
     const items = value.split('\n')
     const currentErrorLines: number[] = []
@@ -82,17 +64,25 @@ function WalletInputModal({
         }
       })
     }
+    if (type === 'receivers') {
+      items.forEach((element, index) => {
+        const datas = element.split(',') || []
+        if (datas.length !== 2 || !isValidAddress(datas[0]) || Number(datas[1]) <= 0) {
+          currentErrorLines.push(index + 1)
+        }
+      })
+    }
     setErrorLines(currentErrorLines)
   }
 
   useEffect(() => {
     // 刷新 CodeMirror
-    if (open && editorRef.current) {
+    if (editorRef.current) {
       setTimeout(() => {
         editorRef.current.refresh()
       }, 0) // Slight delay to allow modal to render
     }
-  }, [open])
+  }, [])
 
   const addPlaceholder = (editor, value) => {
     const wrapper = editor.display.wrapper
@@ -105,72 +95,44 @@ function WalletInputModal({
   }
 
   return (
-    <Modal
-      width={1000}
-      // maskClosable={false}
-      title={title}
-      open={open}
-      destroyOnClose
-      onCancel={onCancel}
-      onOk={handleOK}
-      okButtonProps={{
-        disabled: !(codeValue.length && (errorLines?.length === 0 || !errorLines)),
-      }}
-    >
-      <Flex vertical={true} gap={24} className="content-wrapper">
-        {hasName && (
-          <div>
-            <div className="text-name">{t('manager.formName')}</div>
-            <Input
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value)
-              }}
-              placeholder={t('manager.issuerWallet.namePlaceholder')}
-            />
-          </div>
-        )}
-        <div>
-          <div className="text-name">{showInfo.label}</div>
-          <div className="code-input">
-            <CodeMirror
-              value={codeValue}
-              // className="code-input"
-              options={{
-                // mode: 'xml',
-                // theme: 'material',
-                lineNumbers: true,
-              }}
-              onBeforeChange={(editor, data, value) => {
-                setCodeValue(value)
-                checkValue(value)
-                // 清除先前的行样式
-                if (errorLines && errorLines.length) {
-                  errorLines.forEach((element) => {
-                    editor.removeLineClass(element - 1, 'background', 'error-line')
-                  })
-                }
-                addPlaceholder(editor, value)
-              }}
-              editorDidMount={(editor) => {
-                editorRef.current = editor // Store the editor instance in ref
-                addPlaceholder(editor, walletData?.value)
-              }}
-              onChange={(editor, data, value) => {
-                if (errorLines && errorLines.length) {
-                  errorLines.forEach((element) => {
-                    editor.addLineClass(element - 1, 'background', 'error-line')
-                  })
-                }
-              }}
-            />
-          </div>
-          {errorLines && errorLines.length !== 0 && (
-            <div className="text-error">{`第 ${errorLines.join('、')} 行格式错误`}</div>
-          )}
-        </div>
-      </Flex>
-    </Modal>
+    <div>
+      <div className="text-name">{showInfo.label}</div>
+      <div className="code-input">
+        <CodeMirror
+          value={codeValue}
+          options={{
+            // mode: 'xml',
+            // theme: 'material',
+            lineNumbers: true,
+          }}
+          onBeforeChange={(editor, data, value) => {
+            setCodeValue(value)
+            checkValue(value)
+            // 清除先前的行样式
+            if (errorLines && errorLines.length) {
+              errorLines.forEach((element) => {
+                editor.removeLineClass(element - 1, 'background', 'error-line')
+              })
+            }
+            addPlaceholder(editor, value)
+          }}
+          editorDidMount={(editor) => {
+            editorRef.current = editor // Store the editor instance in ref
+            addPlaceholder(editor, walletData?.value)
+          }}
+          onChange={(editor, data, value) => {
+            if (errorLines && errorLines.length) {
+              errorLines.forEach((element) => {
+                editor.addLineClass(element - 1, 'background', 'error-line')
+              })
+            }
+          }}
+        />
+      </div>
+      {errorLines && errorLines.length !== 0 && (
+        <div className="text-error">{`第 ${errorLines.join('、')} 行格式错误`}</div>
+      )}
+    </div>
   )
 }
 
